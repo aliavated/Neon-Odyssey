@@ -48,11 +48,13 @@ let audioContext = null;
 let soundEnabled = true;
 let mouse = { x: W / 2, y: H / 2, down: false };
 let touchMove = null;
-
 let best = 0;
+let dt = 0;
+
 try {
   best = Number(localStorage.getItem("neonOdysseyBest")) || 0;
 } catch (_) {}
+
 ui.best.textContent = String(best).padStart(6, "0");
 
 function newGame() {
@@ -77,7 +79,8 @@ function newGame() {
   };
 
   player = {
-    x: W / 2, y: H / 2,
+    x: W / 2,
+    y: H / 2,
     r: 12,
     health: 100,
     maxHealth: 100,
@@ -93,6 +96,7 @@ function newGame() {
   obstacles = [];
   keys = {};
   mouse.down = false;
+  touchMove = null;
 
   makeStars();
   makeObstacles();
@@ -108,6 +112,7 @@ function hideOverlays() {
 
 function makeStars() {
   stars = [];
+
   for (let i = 0; i < 150; i++) {
     stars.push({
       x: Math.random() * W,
@@ -154,23 +159,26 @@ function spawnWave() {
     spawnEnemy();
   }
 
-  for (let i = 0; i < game.target; i++) {
-    spawnCrystal();
-  }
-
   if (game.wave % 3 === 0) spawnEnemy(true);
 
   game.mode = "playing";
+
   ui.objective.textContent = game.wave % 3 === 0
     ? "SURVIVE THE SECTOR BOSS"
     : "COLLECT CRYSTALS & SURVIVE";
+
+  for (let i = 0; i < game.target; i++) {
+    spawnCrystal();
+  }
 }
 
 function randomEdgePosition() {
   const side = Math.floor(Math.random() * 4);
+
   if (side === 0) return { x: Math.random() * W, y: 10 };
   if (side === 1) return { x: W - 10, y: Math.random() * H };
   if (side === 2) return { x: Math.random() * W, y: H - 10 };
+
   return { x: 10, y: Math.random() * H };
 }
 
@@ -184,20 +192,33 @@ function spawnEnemy(boss = false) {
 
   const roll = Math.random();
   const type = boss ? "boss" :
-    roll < .5 ? "drone" : roll < .78 ? "runner" : "shooter";
+    roll < .5 ? "drone" :
+    roll < .78 ? "runner" : "shooter";
 
   const specs = {
-    drone:   { r: 12, hp: 2, speed: 75, color: colors.pink, score: 150 },
-    runner:  { r: 9, hp: 1, speed: 130, color: colors.yellow, score: 200 },
-    shooter: { r: 14, hp: 3, speed: 48, color: colors.purple, score: 250 },
-    boss:    { r: 29, hp: 14 + game.wave * 2, speed: 42,
-               color: colors.pink, score: 1500 }
+    drone: {
+      r: 12, hp: 2, speed: 75,
+      color: colors.pink, score: 150
+    },
+    runner: {
+      r: 9, hp: 1, speed: 130,
+      color: colors.yellow, score: 200
+    },
+    shooter: {
+      r: 14, hp: 3, speed: 48,
+      color: colors.purple, score: 250
+    },
+    boss: {
+      r: 29, hp: 14 + game.wave * 2, speed: 42,
+      color: colors.pink, score: 1500
+    }
   };
 
   const s = specs[type];
 
   enemies.push({
-    x: pos.x, y: pos.y,
+    x: pos.x,
+    y: pos.y,
     r: s.r,
     hp: s.hp,
     maxHp: s.hp,
@@ -233,7 +254,8 @@ function spawnCrystal() {
   }
 
   crystals.push({
-    x: pos.x, y: pos.y,
+    x: pos.x,
+    y: pos.y,
     r: 7,
     phase: Math.random() * 6,
     taken: false
@@ -244,7 +266,9 @@ function sound(frequency = 500, duration = .07, type = "sine") {
   if (!soundEnabled) return;
 
   try {
-    audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+    audioContext ||= new (
+      window.AudioContext || window.webkitAudioContext
+    )();
 
     if (audioContext.state === "suspended") audioContext.resume();
 
@@ -252,7 +276,10 @@ function sound(frequency = 500, duration = .07, type = "sine") {
     const gain = audioContext.createGain();
 
     oscillator.type = type;
-    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+    oscillator.frequency.setValueAtTime(
+      frequency, audioContext.currentTime
+    );
+
     gain.gain.setValueAtTime(.045, audioContext.currentTime);
     gain.gain.exponentialRampToValueAtTime(
       .001, audioContext.currentTime + duration
@@ -260,6 +287,7 @@ function sound(frequency = 500, duration = .07, type = "sine") {
 
     oscillator.connect(gain);
     gain.connect(audioContext.destination);
+
     oscillator.start();
     oscillator.stop(audioContext.currentTime + duration);
   } catch (_) {}
@@ -307,8 +335,16 @@ function movePlayer(dx, dy) {
   dy /= length;
 
   const speed = game.speed * (game.dashDuration > 0 ? 3.1 : 1);
-  const nx = Math.max(player.r, Math.min(W - player.r, player.x + dx * speed * dt));
-  const ny = Math.max(player.r, Math.min(H - player.r, player.y + dy * speed * dt));
+
+  const nx = Math.max(
+    player.r,
+    Math.min(W - player.r, player.x + dx * speed * dt)
+  );
+
+  const ny = Math.max(
+    player.r,
+    Math.min(H - player.r, player.y + dy * speed * dt)
+  );
 
   if (!circleHitsObstacle(nx, player.y, player.r)) player.x = nx;
   if (!circleHitsObstacle(player.x, ny, player.r)) player.y = ny;
@@ -316,12 +352,14 @@ function movePlayer(dx, dy) {
   player.angle = Math.atan2(dy, dx);
 }
 
-let dt = 0;
-
 function update(delta) {
   if (!game || !game.running || game.mode !== "playing") return;
 
   dt = Math.min(delta, .033);
+
+  // FIX: Decrease the shooting cooldown every frame.
+  game.fireClock = Math.max(0, game.fireClock - dt);
+
   game.time += dt;
   game.dashClock = Math.max(0, game.dashClock - dt);
   game.dashDuration = Math.max(0, game.dashDuration - dt);
@@ -345,6 +383,7 @@ function update(delta) {
 
   movePlayer(dx, dy);
 
+  // FIX: Holding the mouse fires repeatedly.
   if (mouse.down) shoot();
 
   for (const star of stars) {
@@ -354,11 +393,16 @@ function update(delta) {
   for (const c of crystals) {
     c.phase += dt * 3;
 
-    if (!c.taken && Math.hypot(player.x - c.x, player.y - c.y) < player.r + c.r + 5) {
+    if (
+      !c.taken &&
+      Math.hypot(player.x - c.x, player.y - c.y) <
+        player.r + c.r + 5
+    ) {
       c.taken = true;
       game.crystalCount++;
       game.totalCrystals++;
       game.score += 100;
+
       burst(c.x, c.y, colors.cyan, 16, 170);
       floatText(c.x, c.y - 12, "+100", colors.cyan);
       sound(700 + Math.random() * 300, .1);
@@ -380,13 +424,19 @@ function update(delta) {
         s.dead = true;
         e.hp -= game.damage;
         e.hitFlash = .1;
+
         burst(s.x, s.y, e.color, 5, 70);
 
         if (e.hp <= 0) {
           e.dead = true;
           game.score += e.score;
           game.kills++;
-          burst(e.x, e.y, e.color, e.type === "boss" ? 55 : 18, 220);
+
+          burst(
+            e.x, e.y, e.color,
+            e.type === "boss" ? 55 : 18, 220
+          );
+
           floatText(e.x, e.y, "+" + e.score, colors.yellow);
           sound(e.type === "boss" ? 90 : 240, .18, "triangle");
 
@@ -400,7 +450,8 @@ function update(delta) {
   }
 
   shots = shots.filter(s =>
-    !s.dead && s.life > 0 && s.x > -10 && s.x < W + 10 &&
+    !s.dead && s.life > 0 &&
+    s.x > -10 && s.x < W + 10 &&
     s.y > -10 && s.y < H + 10
   );
 
@@ -413,7 +464,7 @@ function update(delta) {
 
     let vx = player.x - e.x;
     let vy = player.y - e.y;
-    let dist = Math.hypot(vx, vy) || 1;
+    const dist = Math.hypot(vx, vy) || 1;
 
     e.angle = Math.atan2(vy, vx);
 
@@ -421,12 +472,15 @@ function update(delta) {
       const desired = e.type === "boss" ? 185 : 225;
 
       if (dist > desired + 20) {
-        vx /= dist; vy /= dist;
+        vx /= dist;
+        vy /= dist;
       } else if (dist < desired - 25) {
-        vx = -vx / dist; vy = -vy / dist;
+        vx = -vx / dist;
+        vy = -vy / dist;
       } else {
+        const oldVx = vx;
         vx = -vy / dist * .4;
-        vy = vx === 0 ? 0 : (player.x - e.x) / dist * .4;
+        vy = oldVx / dist * .4;
       }
 
       if (e.shootClock <= 0 && dist < 440) {
@@ -436,7 +490,8 @@ function update(delta) {
 
         for (const offset of spread) {
           enemyShots.push({
-            x: e.x, y: e.y,
+            x: e.x,
+            y: e.y,
             vx: Math.cos(a + offset) * speed,
             vy: Math.sin(a + offset) * speed,
             r: e.type === "boss" ? 6 : 4,
@@ -458,12 +513,23 @@ function update(delta) {
     if (!circleHitsObstacle(ex, e.y, e.r)) e.x = ex;
     if (!circleHitsObstacle(e.x, ey, e.r)) e.y = ey;
 
-    if (Math.hypot(player.x - e.x, player.y - e.y) < player.r + e.r) {
+    if (
+      Math.hypot(player.x - e.x, player.y - e.y) <
+      player.r + e.r
+    ) {
       damagePlayer(e.type === "boss" ? 22 : 12);
 
       const knock = Math.atan2(player.y - e.y, player.x - e.x);
-      player.x = Math.max(player.r, Math.min(W - player.r, player.x + Math.cos(knock) * 15));
-      player.y = Math.max(player.r, Math.min(H - player.r, player.y + Math.sin(knock) * 15));
+
+      player.x = Math.max(
+        player.r,
+        Math.min(W - player.r, player.x + Math.cos(knock) * 15)
+      );
+
+      player.y = Math.max(
+        player.r,
+        Math.min(H - player.r, player.y + Math.sin(knock) * 15)
+      );
     }
   }
 
@@ -474,7 +540,10 @@ function update(delta) {
     s.y += s.vy * dt;
     s.life -= dt;
 
-    if (Math.hypot(s.x - player.x, s.y - player.y) < player.r + s.r) {
+    if (
+      Math.hypot(s.x - player.x, s.y - player.y) <
+      player.r + s.r
+    ) {
       s.life = 0;
       damagePlayer(9);
       burst(s.x, s.y, colors.pink, 8, 80);
@@ -482,7 +551,8 @@ function update(delta) {
   }
 
   enemyShots = enemyShots.filter(s =>
-    s.life > 0 && s.x > -20 && s.x < W + 20 &&
+    s.life > 0 &&
+    s.x > -20 && s.x < W + 20 &&
     s.y > -20 && s.y < H + 20
   );
 
@@ -493,12 +563,14 @@ function update(delta) {
     p.vy *= Math.pow(.04, dt);
     p.life -= dt;
   }
+
   particles = particles.filter(p => p.life > 0);
 
   for (const f of floatingTexts) {
     f.y -= 25 * dt;
     f.life -= dt;
   }
+
   floatingTexts = floatingTexts.filter(f => f.life > 0);
 
   updateHUD();
@@ -509,9 +581,13 @@ function update(delta) {
 }
 
 function shoot() {
-  if (game.fireClock > 0) return;
+  if (!game || game.mode !== "playing" || game.fireClock > 0) return;
 
-  const angle = Math.atan2(mouse.y - player.y, mouse.x - player.x);
+  const angle = Math.atan2(
+    mouse.y - player.y,
+    mouse.x - player.x
+  );
+
   player.angle = angle;
 
   shots.push({
@@ -524,17 +600,20 @@ function shoot() {
     dead: false
   });
 
+  // Fire rate: one shot every 170 milliseconds.
   game.fireClock = .17;
+
   sound(330, .035, "square");
 }
 
 function damagePlayer(amount) {
-  if (player.health <= 0 || game.mode !== "playing" || player.health === player.maxHealth && game.invulnerable > 0) return;
-  if (game.invulnerable > 0) return;
+  if (!game || game.mode !== "playing") return;
+  if (game.invulnerable > 0 || player.health <= 0) return;
 
   player.health = Math.max(0, player.health - amount);
   game.invulnerable = .65;
   game.shake = 8;
+
   burst(player.x, player.y, colors.pink, 12, 100);
   sound(100, .15, "sawtooth");
   updateHUD();
@@ -558,7 +637,9 @@ function chooseUpgrade(type) {
   }
 
   if (type === "health") {
-    player.health = Math.min(player.maxHealth, player.health + 35);
+    player.health = Math.min(
+      player.maxHealth, player.health + 35
+    );
     showToast("HULL REPAIRED");
   }
 
@@ -571,6 +652,7 @@ function chooseUpgrade(type) {
   player.x = W / 2;
   player.y = H / 2;
   game.invulnerable = 1.5;
+
   makeObstacles();
   ui.upgrade.classList.remove("active");
   spawnWave();
@@ -580,13 +662,18 @@ function chooseUpgrade(type) {
 function endGame() {
   game.mode = "over";
   game.running = false;
+  mouse.down = false;
 
   if (game.score > best) {
     best = game.score;
-    try { localStorage.setItem("neonOdysseyBest", String(best)); } catch (_) {}
+
+    try {
+      localStorage.setItem("neonOdysseyBest", String(best));
+    } catch (_) {}
   }
 
   ui.best.textContent = String(best).padStart(6, "0");
+
   ui.finalStats.textContent =
     "Score: " + game.score.toLocaleString() +
     " | Sectors cleared: " + (game.wave - 1) +
@@ -602,11 +689,22 @@ function updateHUD() {
   ui.crystals.textContent = game.crystalCount;
   ui.wave.textContent = String(game.wave).padStart(2, "0");
   ui.sector.textContent = String(game.wave).padStart(2, "0");
-  ui.health.style.width = (player.health / player.maxHealth * 100) + "%";
+
+  ui.health.style.width =
+    (player.health / player.maxHealth * 100) + "%";
+
   ui.healthText.textContent = Math.ceil(player.health) + "%";
-  ui.mission.style.width = Math.min(100, game.crystalCount / game.target * 100) + "%";
-  ui.missionText.textContent = game.crystalCount + " / " + game.target + " CRYSTALS COLLECTED";
-  ui.coords.textContent = "X: " + Math.round(player.x) + " / Y: " + Math.round(player.y);
+
+  ui.mission.style.width =
+    Math.min(100, game.crystalCount / game.target * 100) + "%";
+
+  ui.missionText.textContent =
+    game.crystalCount + " / " + game.target +
+    " CRYSTALS COLLECTED";
+
+  ui.coords.textContent =
+    "X: " + Math.round(player.x) +
+    " / Y: " + Math.round(player.y);
 
   if (game.wave >= 10) ui.rank.textContent = "VOID CONQUEROR";
   else if (game.wave >= 6) ui.rank.textContent = "ELITE EXPLORER";
@@ -622,9 +720,13 @@ function drawBackground() {
   ctx.fillStyle = "#070816";
   ctx.fillRect(0, 0, W, H);
 
-  const glow = ctx.createRadialGradient(W * .5, H * .5, 10, W * .5, H * .5, W * .7);
+  const glow = ctx.createRadialGradient(
+    W * .5, H * .5, 10, W * .5, H * .5, W * .7
+  );
+
   glow.addColorStop(0, "#16133b");
   glow.addColorStop(1, "#070816");
+
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, W, H);
 
@@ -632,15 +734,22 @@ function drawBackground() {
   ctx.lineWidth = 1;
 
   for (let x = 0; x <= W; x += 40) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, H);
+    ctx.stroke();
   }
 
   for (let y = 0; y <= H; y += 40) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(W, y);
+    ctx.stroke();
   }
 
   for (const s of stars) {
     const a = s.alpha * (.65 + Math.sin(s.phase) * .35);
+
     ctx.fillStyle = `rgba(190,210,255,${a})`;
     ctx.beginPath();
     ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
@@ -658,14 +767,17 @@ function drawObstacles() {
     ctx.lineWidth = 1.5;
 
     ctx.beginPath();
+
     for (let i = 0; i < 8; i++) {
       const a = i / 8 * Math.PI * 2;
       const r = o.r * (i % 2 ? .9 : 1.05);
       const x = o.x + Math.cos(a) * r;
       const y = o.y + Math.sin(a) * r;
+
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     }
+
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
@@ -675,6 +787,7 @@ function drawObstacles() {
     ctx.beginPath();
     ctx.arc(o.x, o.y, o.r * .58, 0, Math.PI * 2);
     ctx.stroke();
+
     ctx.restore();
   }
 }
@@ -682,6 +795,7 @@ function drawObstacles() {
 function drawCrystals() {
   for (const c of crystals) {
     const r = c.r * (1 + Math.sin(c.phase) * .12);
+
     ctx.save();
     ctx.translate(c.x, c.y);
     ctx.rotate(c.phase * .35);
@@ -699,6 +813,7 @@ function drawCrystals() {
 
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(-1, -r, 2, r * 2);
+
     ctx.restore();
   }
 }
@@ -715,6 +830,7 @@ function drawPlayer() {
     ctx.shadowColor = colors.cyan;
     ctx.strokeStyle = colors.cyan;
     ctx.lineWidth = 3;
+
     ctx.beginPath();
     ctx.moveTo(-30, -5);
     ctx.lineTo(-65 - Math.random() * 12, 0);
@@ -722,14 +838,17 @@ function drawPlayer() {
     ctx.stroke();
   }
 
-  if (game.invulnerable > 0 && Math.floor(game.time * 18) % 2 === 0) {
+  if (
+    game.invulnerable > 0 &&
+    Math.floor(game.time * 18) % 2 === 0
+  ) {
     ctx.globalAlpha = .35;
   }
 
   ctx.shadowBlur = 20;
   ctx.shadowColor = colors.cyan;
+  ctx.fillStyle = colors.cyan;
 
-  ctx.fillStyle = "#53f5ff";
   ctx.beginPath();
   ctx.moveTo(18, 0);
   ctx.lineTo(-10, -10);
@@ -739,6 +858,7 @@ function drawPlayer() {
   ctx.fill();
 
   ctx.fillStyle = "#ffffff";
+
   ctx.beginPath();
   ctx.moveTo(8, 0);
   ctx.lineTo(-5, -4);
@@ -776,17 +896,21 @@ function drawEnemies() {
       ctx.stroke();
     } else if (e.type === "boss") {
       ctx.beginPath();
+
       for (let i = 0; i < 12; i++) {
         const a = i / 12 * Math.PI * 2;
         const r = e.r * (i % 2 === 0 ? 1 : .8);
         const x = Math.cos(a) * r;
         const y = Math.sin(a) * r;
+
         if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
+
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
+
       ctx.fillStyle = colors.pink;
       ctx.beginPath();
       ctx.arc(0, 0, 9 + Math.sin(game.time * 7) * 2, 0, Math.PI * 2);
@@ -807,11 +931,17 @@ function drawEnemies() {
 
     if (e.type === "boss" || e.hp < e.maxHp) {
       const width = e.type === "boss" ? 75 : 28;
+
       ctx.fillStyle = "#ffffff20";
       ctx.fillRect(e.x - width / 2, e.y - e.r - 12, width, 4);
+
       ctx.fillStyle = e.color;
-      ctx.fillRect(e.x - width / 2, e.y - e.r - 12,
-        width * Math.max(0, e.hp / e.maxHp), 4);
+      ctx.fillRect(
+        e.x - width / 2,
+        e.y - e.r - 12,
+        width * Math.max(0, e.hp / e.maxHp),
+        4
+      );
     }
   }
 }
@@ -822,9 +952,11 @@ function drawShots() {
     ctx.shadowBlur = 15;
     ctx.shadowColor = colors.cyan;
     ctx.fillStyle = "#ffffff";
+
     ctx.beginPath();
     ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
     ctx.fill();
+
     ctx.restore();
   }
 
@@ -833,9 +965,11 @@ function drawShots() {
     ctx.shadowBlur = 16;
     ctx.shadowColor = s.color;
     ctx.fillStyle = s.color;
+
     ctx.beginPath();
     ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
     ctx.fill();
+
     ctx.restore();
   }
 }
@@ -846,10 +980,12 @@ function drawParticles() {
     ctx.fillStyle = p.color;
     ctx.shadowBlur = 10;
     ctx.shadowColor = p.color;
+
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
     ctx.fill();
   }
+
   ctx.globalAlpha = 1;
   ctx.shadowBlur = 0;
 
@@ -860,6 +996,7 @@ function drawParticles() {
     ctx.textAlign = "center";
     ctx.fillText(f.text, f.x, f.y);
   }
+
   ctx.globalAlpha = 1;
 }
 
@@ -890,19 +1027,30 @@ function drawRadar() {
   function dot(x, y, color, size) {
     const dx = (x - player.x) / W * radius * 2;
     const dy = (y - player.y) / H * radius * 2;
+
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(rx + dx, ry + dy, size, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  for (const e of enemies) dot(e.x, e.y, e.type === "boss" ? colors.pink : "#ff647e", e.type === "boss" ? 4 : 2);
-  for (const c of crystals) dot(c.x, c.y, colors.cyan, 2.5);
+  for (const e of enemies) {
+    dot(
+      e.x, e.y,
+      e.type === "boss" ? colors.pink : "#ff647e",
+      e.type === "boss" ? 4 : 2
+    );
+  }
+
+  for (const c of crystals) {
+    dot(c.x, c.y, colors.cyan, 2.5);
+  }
 
   ctx.fillStyle = "#ffffff";
   ctx.beginPath();
   ctx.arc(rx, ry, 3, 0, Math.PI * 2);
   ctx.fill();
+
   ctx.restore();
 }
 
@@ -938,6 +1086,7 @@ function loop(timestamp) {
   lastTime = timestamp;
 
   if (game && game.running) update(delta);
+
   render();
   requestAnimationFrame(loop);
 }
@@ -952,6 +1101,7 @@ function togglePause() {
 
   if (game.mode === "playing") {
     game.mode = "paused";
+    mouse.down = false;
     ui.pause.classList.add("active");
   } else if (game.mode === "paused") {
     game.mode = "playing";
@@ -967,6 +1117,7 @@ function dash() {
   game.invulnerable = .25;
 
   let dx = 0, dy = 0;
+
   if (keys.KeyW || keys.ArrowUp) dy--;
   if (keys.KeyS || keys.ArrowDown) dy++;
   if (keys.KeyA || keys.ArrowLeft) dx--;
@@ -978,12 +1129,14 @@ function dash() {
   }
 
   player.angle = Math.atan2(dy, dx);
+
   burst(player.x, player.y, colors.cyan, 12, 130);
   sound(180, .12, "sawtooth");
 }
 
 function pointerPosition(event) {
   const rect = canvas.getBoundingClientRect();
+
   mouse.x = (event.clientX - rect.left) * W / rect.width;
   mouse.y = (event.clientY - rect.top) * H / rect.height;
 }
@@ -1012,12 +1165,13 @@ canvas.addEventListener("pointercancel", () => {
   touchMove = null;
 });
 
-canvas.addEventListener("contextmenu", e => e.preventDefault());
+canvas.addEventListener("contextmenu", event => event.preventDefault());
 
 window.addEventListener("keydown", event => {
   const blocked = [
     "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"
   ];
+
   if (blocked.includes(event.code)) event.preventDefault();
 
   if (event.repeat && ["Escape", "Space"].includes(event.code)) return;
@@ -1035,6 +1189,7 @@ window.addEventListener("keyup", event => {
 window.addEventListener("blur", () => {
   keys = {};
   mouse.down = false;
+
   if (game && game.mode === "playing") togglePause();
 });
 
@@ -1043,12 +1198,18 @@ $("restartBtn").addEventListener("click", startGame);
 $("resumeBtn").addEventListener("click", togglePause);
 
 document.querySelectorAll("[data-upgrade]").forEach(button => {
-  button.addEventListener("click", () => chooseUpgrade(button.dataset.upgrade));
+  button.addEventListener("click", () => {
+    chooseUpgrade(button.dataset.upgrade);
+  });
 });
 
 $("soundBtn").addEventListener("click", () => {
   soundEnabled = !soundEnabled;
-  $("soundBtn").textContent = soundEnabled ? "♫ SOUND ON" : "♫ SOUND OFF";
+
+  $("soundBtn").textContent = soundEnabled
+    ? "♫ SOUND ON"
+    : "♫ SOUND OFF";
+
   if (soundEnabled) sound(700, .1);
 });
 
@@ -1057,3 +1218,4 @@ window.addEventListener("resize", render);
 makeStars();
 drawBackground();
 requestAnimationFrame(loop);
+
