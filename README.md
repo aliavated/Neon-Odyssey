@@ -2,13 +2,13 @@
 
 **A neon-soaked arcade survival game where every sector is a new challenge.**
 
-## 🌌 About the Game
+##  About the Game
 
 Neon Odyssey is a colorful, futuristic arcade game built with HTML, CSS, and JavaScript. Enter a glowing cyberpunk arena, collect energy crystals, fight dangerous drones, dodge enemy projectiles, and survive increasingly difficult sectors.
 
 Every sector brings new enemies, tougher challenges, and opportunities to upgrade your abilities. How far can you travel before the void catches up with you?
 
-## ✨ Features
+##  Features
 
 - **Dynamic Combat:** Shoot enemies and dodge incoming projectiles in real time.
 - **Crystal Collection:** Collect glowing energy crystals to earn points.
