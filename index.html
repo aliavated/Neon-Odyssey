@@ -11,7 +11,29 @@
   <main class="game-shell">
     <header class="topbar">
       <a class="brand" href="#" aria-label="Neon Odyssey home">
-        <span class="brand-icon">✦</span>
+        <span class="brand-icon">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="brandGlow" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#00f5ff"/>
+                <stop offset="100%" stop-color="#a855f7"/>
+              </linearGradient>
+            </defs>
+            <path d="M15 12 A27 27 0 0 1 51 17"
+              fill="none" stroke="#00f5ff" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M53 25 A27 27 0 0 1 43 53"
+              fill="none" stroke="#a855f7" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M34 58 A27 27 0 0 1 7 34"
+              fill="none" stroke="#00f5ff" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M8 25 A27 27 0 0 1 11 18"
+              fill="none" stroke="#a855f7" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M32 13 L43 28 L35 28 L40 43 L22 31 L30 31 Z"
+              fill="url(#brandGlow)"/>
+            <circle cx="51" cy="17" r="3" fill="#00f5ff"/>
+            <circle cx="43" cy="53" r="3" fill="#a855f7"/>
+            <circle cx="7" cy="34" r="3" fill="#00f5ff"/>
+          </svg>
+        </span>
         <span>NEON<span class="pink"> ODYSSEY</span></span>
       </a>
       <div class="top-right">
@@ -135,12 +157,26 @@
         <span id="missionText">0 / 5 CRYSTALS COLLECTED</span>
       </div>
       <div class="pilot">
-        <div class="pilot-avatar">✦</div>
-        <div><span class="hud-label">PILOT</span><strong>UNKNOWN_01</strong><span class="rank" id="rank">ROOKIE EXPLORER</span></div>
+        <div class="pilot-avatar">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M15 12 A27 27 0 0 1 51 17"
+              fill="none" stroke="#00f5ff" stroke-width="4" stroke-linecap="round"/>
+            <path d="M53 25 A27 27 0 0 1 43 53"
+              fill="none" stroke="#a855f7" stroke-width="4" stroke-linecap="round"/>
+            <path d="M34 58 A27 27 0 0 1 7 34"
+              fill="none" stroke="#00f5ff" stroke-width="4" stroke-linecap="round"/>
+            <path d="M32 15 L42 29 L34 29 L39 43 L23 32 L30 32 Z"
+              fill="#00f5ff"/>
+          </svg>
+        </div>
+        <div>
+          <span class="hud-label">PILOT</span>
+          <strong>UNKNOWN_01</strong>
+          <span class="rank" id="rank">ROOKIE EXPLORER</span>
+        </div>
       </div>
     </footer>
   </main>
   <script src="game.js"></script>
 </body>
 </html>
-
