@@ -4,7 +4,7 @@
 
 ##  About the Game
 
-Neon Odyssey is a colorful, futuristic arcade game built with HTML, CSS, and JavaScript. Enter a glowing cyberpunk arena, collect energy crystals, fight dangerous drones, dodge enemy projectiles, and survive increasingly difficult sectors.
+Neon Odyssey is a colorful, futuristic arcade game built with HTML, CSS, and JavaScript. Enter a glowing arena, collect energy crystals, fight dangerous drones, dodge enemy projectiles, and survive increasingly difficult sectors.
 
 Every sector brings new enemies, tougher challenges, and opportunities to upgrade your abilities. How far can you travel before the void catches up with you?
 
@@ -33,7 +33,7 @@ Every sector brings new enemies, tougher challenges, and opportunities to upgrad
 | Spacebar | Dash |
 | Escape | Pause / Resume |
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Option 1: Run Locally
 
@@ -61,7 +61,7 @@ neon-odyssey/
 └── README.md    # Project documentation
 ```
 
-## 🛠️ Technologies Used
+##  Technologies Used
 
 - **HTML5** for the game's structure.
 - **CSS3** for the interface, responsive styling, and neon effects.
@@ -70,13 +70,13 @@ neon-odyssey/
 - **Web Audio API** for synthesized sound effects.
 - **Local Storage** for saving the personal-best score.
 
-## 🎯 Objective
+##  Objective
 
 Collect the required crystals and eliminate every enemy to clear each sector. Choose upgrades strategically, conserve your hull integrity, and prepare for boss encounters.
 
 Your mission is simple: survive the grid and push beyond your limits.
 
-## 🔮 Future Improvements
+##  Future Improvements
 
 Potential expansions include:
 
@@ -87,7 +87,7 @@ Potential expansions include:
 - A dedicated mobile control system.
 - Online leaderboards and achievements.
 
-## 📜 License
+##  License
 
 This project is available for personal and educational use. Add a formal open-source license if you intend to distribute it under specific reuse permissions.
 
