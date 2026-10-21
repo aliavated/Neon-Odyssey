@@ -90,7 +90,3 @@ Potential expansions include:
 ##  License
 
 This project is available for personal and educational use. Add a formal open-source license if you intend to distribute it under specific reuse permissions.
-
----
-
-**CONQUER THE VOID. MAKE YOUR LEGEND.** ✦
