@@ -51,7 +51,7 @@ No installation, server, or API key is required.
 3. Right-click `index.html`.
 4. Select **Open with Live Server**.
 
-## 📁 Project Structure
+##  Project Structure
 
 ```text
 neon-odyssey/
