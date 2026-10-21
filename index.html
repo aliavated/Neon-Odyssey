@@ -1,1 +1,146 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Odyssey | Beyond the Grid</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="game-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Neon Odyssey home">
+        <span class="brand-icon">✦</span>
+        <span>NEON<span class="pink"> ODYSSEY</span></span>
+      </a>
+      <div class="top-right">
+        <span class="online"><i></i> SYSTEM ONLINE</span>
+        <button id="soundBtn" class="small-btn" aria-label="Toggle sound">♫ SOUND ON</button>
+      </div>
+    </header>
+
+    <section class="intro">
+      <div>
+        <p class="eyebrow">ARCADE / SURVIVAL / 001</p>
+        <h1>BEYOND THE <span>GRID.</span></h1>
+        <p class="subtitle">A neon universe. Endless danger. Your legend starts here.</p>
+      </div>
+      <div class="highscore-box">
+        <span>PERSONAL BEST</span>
+        <strong id="bestScore">000000</strong>
+      </div>
+    </section>
+
+    <section class="hud">
+      <div class="hud-stat">
+        <span class="hud-label">ENERGY CRYSTALS</span>
+        <strong>◆ <span id="crystals">0</span></strong>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">SCORE</span>
+        <strong id="score">000000</strong>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">SECTOR</span>
+        <strong id="wave">01</strong>
+      </div>
+      <div class="hud-stat health-stat">
+        <span class="hud-label">HULL INTEGRITY</span>
+        <div class="health-track"><div id="healthFill"></div></div>
+        <strong id="healthText">100%</strong>
+      </div>
+    </section>
+
+    <section class="arena">
+      <canvas id="game" width="960" height="560"
+        aria-label="Neon Odyssey game arena"></canvas>
+
+      <div class="arena-label"><i></i> LIVE FEED // SECTOR <span id="sectorLabel">01</span></div>
+      <div class="arena-coords" id="coords">X: 480 / Y: 280</div>
+
+      <div class="overlay active" id="startScreen">
+        <div class="overlay-content">
+          <div class="portal">✧</div>
+          <p class="eyebrow">YOUR STORY BEGINS HERE</p>
+          <h2>NEON <span>ODYSSEY</span></h2>
+          <p>Collect crystals. Survive the drones.<br>Conquer the sectors.</p>
+          <button id="startBtn" class="primary-btn">ENTER THE GRID <span>↗</span></button>
+          <small>NO SAVE POINTS. JUST YOU AND THE VOID.</small>
+        </div>
+      </div>
+
+      <div class="overlay" id="pauseScreen">
+        <div class="overlay-content">
+          <p class="eyebrow">TRANSMISSION INTERRUPTED</p>
+          <h2>PAUSED<span>.</span></h2>
+          <p>The universe can wait.</p>
+          <button id="resumeBtn" class="primary-btn">RESUME MISSION ↗</button>
+        </div>
+      </div>
+
+      <div class="overlay" id="upgradeScreen">
+        <div class="overlay-content upgrade-content">
+          <p class="eyebrow">SECTOR CLEARED</p>
+          <h2>EVOLVE<span>.</span></h2>
+          <p>Select an upgrade before entering the next sector.</p>
+          <div class="upgrade-grid">
+            <button class="upgrade-card" data-upgrade="speed">
+              <span>01 / MOBILITY</span><b>PHASE DRIVE</b>
+              <p>Move 18% faster.</p><strong>↗</strong>
+            </button>
+            <button class="upgrade-card" data-upgrade="health">
+              <span>02 / DEFENSE</span><b>REINFORCED HULL</b>
+              <p>Restore 35 hull points.</p><strong>✚</strong>
+            </button>
+            <button class="upgrade-card" data-upgrade="power">
+              <span>03 / OFFENSE</span><b>PLASMA CORE</b>
+              <p>Deal 1 extra damage.</p><strong>✦</strong>
+            </button>
+          </div>
+          <small>CHOOSE WISELY. THE NEXT SECTOR IS HARDER.</small>
+        </div>
+      </div>
+
+      <div class="overlay" id="gameOverScreen">
+        <div class="overlay-content">
+          <div class="portal danger">×</div>
+          <p class="eyebrow">SIGNAL LOST</p>
+          <h2>GAME <span>OVER</span></h2>
+          <p id="finalStats">You made it through 0 sectors.</p>
+          <button id="restartBtn" class="primary-btn">REBOOT SYSTEM ↻</button>
+        </div>
+      </div>
+
+      <div id="toast" class="toast">CRYSTAL ACQUIRED +100</div>
+    </section>
+
+    <footer class="bottom-panel">
+      <div class="controls">
+        <span class="hud-label">FLIGHT CONTROLS</span>
+        <div class="key-row">
+          <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+          <span>MOVE</span>
+          <kbd>SPACE</kbd><span>DASH</span>
+        </div>
+        <div class="key-row">
+          <kbd>CLICK</kbd><span>SHOOT</span>
+          <kbd>ESC</kbd><span>PAUSE</span>
+        </div>
+      </div>
+      <div class="mission">
+        <span class="hud-label">CURRENT OBJECTIVE</span>
+        <strong id="objective">COLLECT CRYSTALS & SURVIVE</strong>
+        <div class="mission-track"><div id="missionFill"></div></div>
+        <span id="missionText">0 / 5 CRYSTALS COLLECTED</span>
+      </div>
+      <div class="pilot">
+        <div class="pilot-avatar">✦</div>
+        <div><span class="hud-label">PILOT</span><strong>UNKNOWN_01</strong><span class="rank" id="rank">ROOKIE EXPLORER</span></div>
+      </div>
+    </footer>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
+
